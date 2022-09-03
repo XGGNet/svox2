@@ -266,6 +266,8 @@ torch.manual_seed(20200823)
 np.random.seed(20200823)
 
 factor = 1
+
+# 数据
 dset = datasets[args.dataset_type](
                args.data_dir,
                split="train",
@@ -479,16 +481,20 @@ while True:
             gstep_id = iter_id + gstep_id_base
             if args.lr_fg_begin_step > 0 and gstep_id == args.lr_fg_begin_step:
                 grid.density_data.data[:] = args.init_sigma
+
+            # 计算几个LOSS的时变系数
             lr_sigma = lr_sigma_func(gstep_id) * lr_sigma_factor
             lr_sh = lr_sh_func(gstep_id) * lr_sh_factor
             lr_basis = lr_basis_func(gstep_id - args.lr_basis_begin_step) * lr_basis_factor
             lr_sigma_bg = lr_sigma_bg_func(gstep_id - args.lr_basis_begin_step) * lr_basis_factor
             lr_color_bg = lr_color_bg_func(gstep_id - args.lr_basis_begin_step) * lr_basis_factor
+            
             if not args.lr_decay:
                 lr_sigma = args.lr_sigma * lr_sigma_factor
                 lr_sh = args.lr_sh * lr_sh_factor
                 lr_basis = args.lr_basis * lr_basis_factor
-
+            
+            # 数据处理
             batch_end = min(batch_begin + args.batch_size, epoch_size)
             batch_origins = dset.rays.origins[batch_begin: batch_end]
             batch_dirs = dset.rays.dirs[batch_begin: batch_end]
@@ -552,6 +558,7 @@ while True:
             #          sparsity_file.write(f"{gstep_id} {nz}\n")
 
             # Apply TV/Sparsity regularizers
+            # 正则化
             if args.lambda_tv > 0.0:
                 #  with Timing("tv_inpl"):
                 grid.inplace_tv_grad(grid.density_data.grad,
@@ -590,6 +597,7 @@ while True:
             #        ' sh', torch.count_nonzero(grid.sparse_sh_grad_indexer).item())
 
             # Manual SGD/rmsprop step
+            # SGD优化
             if gstep_id >= args.lr_fg_begin_step:
                 grid.optim_density_step(lr_sigma, beta=args.rms_beta, optim=args.sigma_optim)
                 grid.optim_sh_step(lr_sh, beta=args.rms_beta, optim=args.sh_optim)
