@@ -74,7 +74,6 @@ group.add_argument('--background_nlayers', type=int, default=0,#32,
 group.add_argument('--background_reso', type=int, default=512, help='Background resolution')
 
 
-
 group = parser.add_argument_group("optimization")
 group.add_argument('--n_iters', type=int, default=10 * 12800, help='total number of iters to optimize for')
 group.add_argument('--batch_size', type=int, default=
@@ -93,7 +92,7 @@ group.add_argument('--lr_sigma_delay_steps', type=int, default=15000,
                    help="Reverse cosine steps (0 means disable)")
 group.add_argument('--lr_sigma_delay_mult', type=float, default=1e-2)#1e-4)#1e-4)
 
-
+1
 group.add_argument('--sh_optim', choices=['sgd', 'rmsprop'], default='rmsprop', help="SH optimizer")
 group.add_argument('--lr_sh', type=float, default=
                     1e-2,
